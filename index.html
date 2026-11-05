@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0e3b47">
+  <title>Experiential Learning Universe · ELA</title>
+  <meta name="description" content="ELA öğrenme evrenine açılın. Teknenizi seçin, adaları gezin ve derneğin ve akademinin yeni yapısını yakından tanıyın.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Experiential Learning Universe · ELA">
+  <meta property="og:description" content="Teknenizi seçin, adaları gezin ve ELA'nın yeni öğrenme yapısını keşfedin.">
+  <meta property="og:image" content="assets/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/dm-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/lora-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  
+  <link rel="stylesheet" href="css/ela.css">
+  <script type="module" src="js/app.mjs"></script>
+</head>
+<body>
+<div id="app" data-mode="map">
+
+  <header class="topbar">
+    <button id="home" class="brand" type="button" aria-label="Evren haritasına dön">
+      <span class="brand-mark" aria-hidden="true">ELA</span>
+      <span class="brand-name">Experiential Learning Universe</span>
+    </button>
+    <nav class="topbar-actions" aria-label="Oyun menüsü">
+      <button id="map-return" class="chip" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20Z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span>Haritaya dön</span></button>
+      <button id="logbook-open" class="chip" type="button" aria-expanded="false" aria-controls="logbook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6"/></svg><span>Seyir defteri</span></button>
+      <button id="menu-open" class="chip chip-icon" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu" aria-label="Ayarlar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>
+    </nav>
+    <div id="menu" class="menu" role="menu" hidden>
+      <button role="menuitem" id="menu-boat" type="button"><span id="menu-boat-icon" class="menu-icon" aria-hidden="true"></span>Yelken rengini değiştir</button>
+      <button role="menuitemcheckbox" id="menu-motion" type="button" aria-checked="true"><span class="menu-icon" aria-hidden="true">≈</span><span>Dalga ve kuşlar</span><span class="menu-state" id="menu-motion-state">Açık</span></button>
+      <button role="menuitem" id="menu-about" type="button"><span class="menu-icon" aria-hidden="true">i</span>Bu oyun hakkında</button>
+      <button role="menuitem" id="menu-reset" type="button" class="danger"><span class="menu-icon" aria-hidden="true">↺</span>Baştan başla</button>
+    </div>
+  </header>
+
+  <!-- One continuous sea: every island artwork at its place, under one camera. -->
+  <div id="stage" class="stage" tabindex="0" role="application" aria-label="Öğrenme evreni. Sürükleyerek gezinin; artı ve eksi tuşlarıyla yakınlaştırın.">
+    <div id="world" class="world">
+      <div id="isles"></div>
+      <svg id="world-layer" class="world-layer" viewBox="0 0 6700 3500" aria-hidden="true">
+        <defs>
+          <symbol id="boat-symbol" viewBox="0 0 88 92"><ellipse cx="44" cy="83" rx="32" ry="5" fill="#fff" opacity=".35"/><path d="M17 69Q44 83 74 66L65 81Q39 91 20 79Z" fill="#824f2e" stroke="#fff0c8" stroke-width="2"/><path d="M44 8V72" stroke="#704723" stroke-width="3"/><path d="M41 14 12 64H41Z" fill="currentColor" stroke="#fff4d5" stroke-width="2"/><path d="m48 25 22 37H48Z" fill="#fff5de" stroke="#d1b482" stroke-width="1.5"/><path d="m46 8 13 4-13 5Z" fill="currentColor"/><path d="M8 86q13-5 23 0t24 0t25 0" fill="none" stroke="#e9f9ff" stroke-width="2" opacity=".85"/></symbol>
+        </defs>
+        <g id="route-layer"></g>
+        <g id="hit-layer"></g>
+        <g id="boat"><ellipse cx="0" cy="17" rx="34" ry="10" fill="#083f60" opacity=".22"/><use href="#boat-symbol" x="-32" y="-43" width="64" height="67"/></g>
+      </svg>
+    </div>
+  </div>
+  <div id="labels" class="labels" role="group" aria-label="Adalar"></div>
+  <canvas id="ambient" aria-hidden="true"></canvas>
+
+
+  <p id="hint" class="hint" role="status"></p>
+  <p id="travel" class="travel" role="status" hidden></p>
+
+  <div class="zoom" id="zoom" aria-label="Görünüm kontrolleri" role="group">
+    <button id="zoom-in" type="button" aria-label="Yakınlaştır">+</button>
+    <button id="zoom-out" type="button" aria-label="Uzaklaştır">−</button>
+    <button id="zoom-fit" type="button" aria-label="Tamamını göster"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+
+  <aside id="panel" class="panel" data-state="closed" aria-live="polite" tabindex="-1">
+    <button id="panel-grip" class="panel-grip" type="button" aria-label="Paneli büyüt"><span></span></button>
+    <button id="panel-close" class="icon-button panel-close" type="button" aria-label="Paneli küçült">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+    <div id="panel-scroll" class="panel-scroll"><div id="panel-body" class="panel-body"></div></div>
+    <footer id="panel-actions" class="panel-actions"></footer>
+  </aside>
+
+  <aside id="logbook" class="logbook" aria-labelledby="logbook-title" hidden>
+    <div class="logbook-head">
+      <h2 id="logbook-title">Seyir defteri</h2>
+      <button id="logbook-close" class="icon-button" type="button" aria-label="Seyir defterini kapat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Seyir defteri bölümleri">
+      <button role="tab" id="tab-journey" aria-controls="logbook-journey" aria-selected="true" type="button">Yolculuğum</button>
+      <button role="tab" id="tab-structure" aria-controls="logbook-structure" aria-selected="false" type="button" tabindex="-1">Evrenin yapısı</button>
+    </div>
+    <div id="logbook-journey" class="logbook-body" role="tabpanel" aria-labelledby="tab-journey"></div>
+    <div id="logbook-structure" class="logbook-body" role="tabpanel" aria-labelledby="tab-structure" hidden></div>
+  </aside>
+
+  <dialog id="welcome" class="welcome" aria-labelledby="welcome-title">
+    <form method="dialog" class="welcome-card">
+      <p class="welcome-kicker">ELA · Deneyimsel Öğrenme Akademisi</p>
+      <h1 id="welcome-title">Yolculuk sizin.<br>Teknenizi seçin.</h1>
+      <p id="welcome-lead" class="welcome-lead">İki başlangıç adası, keşfedilecek farklı yollar. Sizi temsil edecek yelkenin rengini seçin.</p>
+      <div id="boat-preview" class="boat-preview" aria-hidden="true"></div>
+      <fieldset class="swatches">
+        <legend>Yelken rengi</legend>
+        <div id="swatches" class="swatch-row" role="radiogroup" aria-label="Yelken rengi"></div>
+      </fieldset>
+      <button id="start" class="button primary wide" type="button">Evrene açıl</button>
+      <p id="welcome-note" class="welcome-note">Bu bir tanıtım oyunudur: başvurular, değerlendirmeler ve unvanlar yalnızca oyunda temsil edilir. Yolculuğunuz bu tarayıcıda kaldığı yerden devam eder.</p>
+    </form>
+  </dialog>
+
+  <dialog id="about" class="sheet-dialog" aria-labelledby="about-title">
+    <div class="dialog-card">
+      <h2 id="about-title">Bu oyun hakkında</h2>
+      <p>Experiential Learning Universe, ELA'nın derneği ve akademisiyle birlikte kurduğu yeni öğrenme yapısını bir deniz yolculuğu olarak anlatır. Her ada bir program, topluluk alanı ya da yeterlilik aşamasıdır; kapılar ise adalar arasındaki geçiş koşullarıdır.</p>
+      <h3>Nasıl gezilir?</h3>
+      <ul>
+        <li>Haritada renkli adalar açıktır; gri adaların koşullarını dokunarak görebilirsiniz.</li>
+        <li>Adaya vardığınızda görseli sürükleyip yakınlaştırabilir, işaretli tabelalara dokunarak mekân bilgilerini açabilirsiniz.</li>
+        <li>Seyir defterinde ilerlemenizi ve evrenin bütün yapısını görürsünüz.</li>
+        <li>Klavyede ← ve → tuşları panelde geri ve ileri gider.</li>
+      </ul>
+      <h3>Kayıt ve gerçeklik</h3>
+      <p>Bu bir tanıtım oyunudur. Başvurular, değerlendirmeler, belgeler ve unvanlar yalnızca oyunda temsil edilir; gerçek bir başvuru gönderilmez, resmî unvan verilmez. Panellerde “Netleşecek” diye işaretlenen konular, yapının henüz kesinleşmemiş ayrıntılarıdır.</p>
+      <p>İlerlemeniz yalnızca bu tarayıcıda saklanır. Tarayıcı verilerini temizlemek veya “Baştan başla” seçeneği yolculuğu sıfırlar.</p>
+      <div class="dialog-actions"><button class="button primary" type="button" data-close>Tamam</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="reset" class="sheet-dialog" aria-labelledby="reset-title">
+    <div class="dialog-card">
+      <h2 id="reset-title">Yeniden yola çıkalım mı?</h2>
+      <p>Tekne seçiminiz ve bütün yolculuk ilerlemeniz silinecek. Başlangıca döneceksiniz.</p>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close>Vazgeç</button><button id="reset-confirm" class="button danger" type="button">Evet, baştan başla</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="achievement" class="achievement" aria-labelledby="achievement-title" aria-describedby="achievement-description">
+    <button id="achievement-close" class="icon-button achievement-close" type="button" aria-label="Tebrik penceresini kapat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    <div class="achievement-hero">
+      <svg class="achievement-seal" viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="30"/><circle cx="36" cy="36" r="23"/><path d="M36 6v8m0 44v8M6 36h8m44 0h8"/><path class="needle" d="m36 19 5 12 12 5-12 5-5 12-5-12-12-5 12-5Z"/></svg>
+      <p class="achievement-kicker">Yolculuğunuzda bir dönüm noktası</p>
+      <h2 id="achievement-title"></h2>
+      <p id="achievement-description"></p>
+      <p class="achievement-saved"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>Seyir defterinize kaydedildi</p>
+    </div>
+    <div class="achievement-next">
+      <h3 id="achievement-next-title"></h3>
+      <div id="achievement-actions" class="achievement-actions"></div>
+      <div id="achievement-stay"></div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+</div>
+</body>
+</html>
